@@ -43,7 +43,7 @@ export const isTrueValue = (x: Value): boolean =>
 
     
 // HW3
-const evalTraceExp = (exp: TraceExp): Result<void> =>
+const evalTraceExp = (exp: TraceExp): Result<void> => ;// todo
     // complete this
 
 // HW3 use these functions
@@ -75,8 +75,10 @@ const applyClosure = (proc: Closure, args: Value[]): Result<Value> => {
     return evalSequence(proc.body, makeExtEnv(vars, args, proc.env));
 }
 
-const applyTracedClosure = (proc: TracedClosure, args: Value[]): Result<Value> => 
-    // complete this
+const applyTracedClosure = (proc: TracedClosure, args: Value[]): Result<Value> => {//todo
+    const vars = map((v: VarDecl) => v.var, proc.closure.params);
+    return evalSequence(proc.closure.body, makeExtEnv(vars, args, proc.closure.env));
+}
 
 
 
