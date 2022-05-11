@@ -8,6 +8,7 @@ import { append, map } from 'ramda';
 import { isArray, isNumber, isString } from '../shared/type-predicates';
 import { CExp, isPrimOp, PrimOp, VarDecl, unparse } from './L4-ast';
 import { Env } from './L4-env-box';
+import {Box, makeBox} from "../shared/box";
 
 // Add void for value of side-effect expressions - set! and define
 export type Value = SExpValue | Closure | TracedClosure // HW3
@@ -49,11 +50,11 @@ export interface TracedClosure {
     tag: "TracedClosure";
     closure : Closure;
     name : string;
-    depth : number;
+    depth : Box<number>;
 }
 
 export const makeTracedClosure = (closure: Closure, name: string): TracedClosure =>
-    ({tag : "TracedClosure", closure, name,depth : 1})
+    ({tag : "TracedClosure", closure, name, depth : makeBox(0)})
     
 export const isTraceClosure = (x: any): x is TracedClosure => x.tag === "TracedClosure"
 

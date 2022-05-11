@@ -11,8 +11,9 @@ import { applyEnv, applyEnvBdg, globalEnvAddBinding, makeExtEnv, setFBinding,
 import { isClosure, makeClosure, Closure, Value, valueToString, TracedClosure, isTraceClosure, makeTracedClosure } from "./L4-value-box";
 import { applyPrimitive } from "./evalPrimitive-box";
 import { first, rest, isEmpty, cons } from "../shared/list";
-import { Result, bind, mapv, mapResult, makeFailure, makeOk } from "../shared/result";
+import {Result, bind, mapv, mapResult, makeFailure, makeOk, isOk} from "../shared/result";
 import { parse as p } from "../shared/parser";
+import {setBox, unbox} from "../shared/box";
 
 // ========================================================
 // Eval functions
@@ -43,8 +44,10 @@ export const isTrueValue = (x: Value): boolean =>
 
     
 // HW3
-const evalTraceExp = (exp: TraceExp): Result<void> => ;// todo
-    // complete this
+const evalTraceExp = (exp: TraceExp): Result<void> =>
+    bind(applyEnvBdg(theGlobalEnv, exp.var.var), (bdg: FBinding) => isClosure(unbox(bdg.val)) ?
+    makeOk(setFBinding(bdg, makeTracedClosure(unbox(bdg.val) as Closure, exp.var.var))) : makeFailure("failed"))
+
 
 // HW3 use these functions
 const printPreTrace = (name: string, vals: Value[], counter: number): void =>
@@ -75,9 +78,13 @@ const applyClosure = (proc: Closure, args: Value[]): Result<Value> => {
     return evalSequence(proc.body, makeExtEnv(vars, args, proc.env));
 }
 
-const applyTracedClosure = (proc: TracedClosure, args: Value[]): Result<Value> => {//todo
-    const vars = map((v: VarDecl) => v.var, proc.closure.params);
-    return evalSequence(proc.closure.body, makeExtEnv(vars, args, proc.closure.env));
+const applyTracedClosure = (proc: TracedClosure, args: Value[]): Result<Value> => {
+    printPreTrace(proc.name, args, unbox(proc.depth))
+    setBox(proc.depth, unbox(proc.depth) + 1);
+    const val = applyClosure(proc.closure, args);
+    setBox(proc.depth, unbox(proc.depth) - 1);
+    isOk(val) ? printPostTrace(val.value, unbox(proc.depth)) : "";
+    return val
 }
 
 
